@@ -6,6 +6,8 @@ import (
 
 func handleImage(c *gin.Context) {
 	// Check if parameter is equal to one of the files in img folder
+	// Path parameters are used to identify something specific
+	// Query parameters are used to sort or filter those resources
 	image := c.Param("image")
 	c.File("img/" + image)
 }
