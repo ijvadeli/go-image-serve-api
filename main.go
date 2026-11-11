@@ -1,16 +1,19 @@
 package main
 
 import (
-	"log"
-	"net/http"
+	"github.com/gin-gonic/gin"
 )
 
-func main() {
-	http.HandleFunc("/img", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Distribution", `attachment; filename="img/gopher.png"`)
-		http.ServeFile(w, r, "img/gopher.png")
-	})
+func handleImage(c *gin.Context) {
+	// Check if parameter is equal to one of the files in img folder
+	image := c.Param("image")
+	c.File("img/" + image)
+}
 
-	log.Println("Listening on port :8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+func main() {
+	r := gin.Default()
+
+	r.GET("/img/:image", handleImage)
+
+	r.Run(":8080")
 }
