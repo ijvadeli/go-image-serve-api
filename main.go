@@ -1,26 +1,43 @@
 package main
 
 import (
-	"log"
 	"net/http"
-	"os"
-	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
-func main() {
-	http.HandleFunc("/img", func(w http.ResponseWriter, r *http.Request) {
-		buf, err := os.ReadFile("img/gopher.png")
-		if err != nil {
-			http.Error(w, "Image not found", http.StatusNotFound)
-			return
-		}
+// Simple home handler displaying client ip
+func homeHandler(c *gin.Context) {
+	clientIP := c.ClientIP()
 
-		w.Header().Set("Content-Type", "image/png")
-		w.Header().Set("Content-Length", strconv.Itoa(len(buf)))
-
-		w.Write(buf)
+	c.HTML(http.StatusOK, "templates/index.tmpl", gin.H{
+		"clientip": clientIP,
 	})
+}
 
-	log.Println("Listening on port :8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+func handleImage(c *gin.Context) {
+	// Create image parameter
+	image := c.Param("image")
+
+	// Serve html file based off of index.tmpl template and using the image parameter
+	c.HTML(http.StatusOK, "templates/image.tmpl", gin.H{
+		"title": image,
+		"image": "/assets/" + image,
+	})
+}
+
+func main() {
+	r := gin.Default()
+	// Set trusted proxies using default gateway/admin address
+	r.SetTrustedProxies([]string{"192.168.1.2"})
+	// Load html files identified by global pattern, I use tmpl since gin recommends it
+	// tmpl is template file used alot by go
+	r.LoadHTMLGlob("templates/*")
+	// Mapping between URL path and filesystem path to display images
+	r.Static("/assets", "./assets")
+	// Routing
+	r.GET("/", homeHandler)
+	r.GET("/:image", handleImage)
+
+	r.Run(":8080")
 }
