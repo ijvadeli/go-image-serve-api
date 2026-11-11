@@ -22,6 +22,9 @@ func handleImage(c *gin.Context) {
 func main() {
 	r := gin.Default()
 
+	// Set trusted proxies using default gateway/admin address
+	r.SetTrustedProxies([]string{"192.168.1.2"})
+
 	// Load html files identified by global pattern, I use tmpl since gin recommends it
 	// tmpl is template file used alot by go
 	r.LoadHTMLGlob("templates/*")
